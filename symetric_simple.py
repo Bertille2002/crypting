@@ -1,3 +1,4 @@
+import sys
 
 def encrypt(message, key_phrase) : 
     encrypted_message = []
@@ -25,10 +26,11 @@ def decrypt(encrypted_message, key_phrase) :
 
 def main() :
     print("Encrypt any message today !")
-    message = input("Enter the message you want to encrypt : ")
+    print("Enter the message you want to encrypt then press enter then Ctrl+Z then enter (on windows) to finish : ")
+    message = sys.stdin.read()
     key_phrase = input("Enter the key for encryption : ")
     encrypted_message = encrypt(message, key_phrase)
-    print("\n Encripted message (raw) : ", encrypted_message)
+
     print("\n Encrypted message (hex) : ", encrypted_message.encode('utf-8').hex())
 
     decrypt_choice = input("\n Would you like to decrypt the message to test it? (y/n) : ")
