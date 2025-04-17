@@ -65,10 +65,11 @@ def main() :
             decrypted_message = decrypt(private_key, encrypted_message)
             print("\nDecrypted message : ", decrypted_message)
         else : 
-            choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
-            if choice2 == n : 
-                print("Thank you.")
-                break 
+            print("\nOkay !") 
+        choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
+        if choice2 == 'n' : 
+            print("Thank you.")
+            break 
 
 if __name__ == "__main__" :
     main()
