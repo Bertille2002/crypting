@@ -110,12 +110,12 @@ def main() :
                 message = sys.stdin.read()
                 public_key, private_key = generate_keys()
                 print(f"\nPublic Key: {public_key}")
-                print(f"\nPrivate Key: {private_key}")
                 message_hash = hash_message(message)
                 combined_message = f"{message}||{message_hash}"
                 encrypted_message = encrypt(public_key, combined_message)
                 print("\nEncrypted message : ", encrypted_message)
-                print("\nSending message to Bob...")
+                print("\nPreparing to send message to Bob...")
+                time.sleep(5)
                 envelope_animation()
                 choice = input("\nWould you like to decrypt the message (y/n) ? ")
                 if choice == 'y' : 
@@ -125,6 +125,7 @@ def main() :
                         password_receiver = input("\nPlease enter your password : ").strip()
                         if password_receiver == password_bob : 
                             print("\nLogin successful !")
+                            print(f"\nPrivate Key: {private_key}")
                             decrypted_combined = decrypt(private_key, encrypted_message)
                             message_received, received_hash = decrypted_combined.rsplit("||", 1)
                             recalculated_hash = hash_message(message_received)
