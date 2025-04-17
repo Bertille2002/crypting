@@ -51,25 +51,48 @@ def decrypt(private_key, cipher_text) :
 
 def main() :
     print("\nSimple RSA encryption")
+    username_alice = 'alice'
+    password_alice = 'alice'
+    username_bob = 'bob'
+    password_bob = 'bob'
     while True : 
-        # print("\nPlease write the message you wish to encrypt : ")
-        # message = sys.stdin.read()
-        message = input("\nPlease write the message you wish to encrypt : ")
-        public_key, private_key = generate_keys()
-        print(f"\nPublic Key: {public_key}")
-        print(f"\nPrivate Key: {private_key}")
-        encrypted_message = encrypt(public_key, message)
-        print("\nEncrypted message : ", encrypted_message)
-        choice = input("Would you like to decrypt the message (y/n) ? ")
-        if choice == 'y' : 
-            decrypted_message = decrypt(private_key, encrypted_message)
-            print("\nDecrypted message : ", decrypted_message)
-        else : 
-            print("\nOkay !") 
-        choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
-        if choice2 == 'n' : 
-            print("Thank you.")
-            break 
+        print("\nWelcome Alice, to verify it's you, please sign in.")
+        username_sender = input("Please enter your username : ").strip()
+        if username_sender == username_alice : 
+            password_sender = input("Please enter your password : ").strip()
+            if password_sender == password_alice :
+                print("\nLogin successful !")
+                print("\nPlease write the message you wish to encrypt : ")
+                message = sys.stdin.read()
+                public_key, private_key = generate_keys()
+                print(f"\nPublic Key: {public_key}")
+                print(f"\nPrivate Key: {private_key}")
+                encrypted_message = encrypt(public_key, message)
+                print("\nEncrypted message : ", encrypted_message)
+                choice = input("\nWould you like to decrypt the message (y/n) ? ")
+                if choice == 'y' : 
+                    print("\nTo receive the message, you must be logged in as Bob.")
+                    username_receiver = input("\nPlease enter your username : ").strip()
+                    if username_receiver == username_bob :
+                        password_receiver = input("\nPlease enter your password : ").strip()
+                        if password_receiver == password_bob : 
+                            print("\nLogin successful !")
+                            decrypted_message = decrypt(private_key, encrypted_message)
+                            print("\nDecrypted message : ", decrypted_message)
+                        else :
+                            print("Incorrect password.")
+                    else :
+                        print("Incorrect username")
+                else : 
+                    print("\nOkay !") 
+                choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
+                if choice2 == 'n' : 
+                    print("Thank you.")
+                    break 
+            else :
+                print("Incorrect password.")
+        else :
+            print("Incorrect username.")
 
 if __name__ == "__main__" :
     main()
