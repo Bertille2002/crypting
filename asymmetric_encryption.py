@@ -4,7 +4,7 @@ import sys
 def great_comm_div(a, b) :
     while b != 0 :
         a, b = b, a % b
-        return a
+    return a
 
 def modinv(a, m) :
     m0, x0, x1 = m, 0, 1
@@ -22,7 +22,7 @@ def is_prime(n) :
             return False
     return True
 
-def gen_prime(start = 1, end = 200) : 
+def gen_prime(start = 100, end = 300) : 
     while True :
         p = random.randint(start, end)
         if is_prime(p) :
