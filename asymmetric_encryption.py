@@ -2,6 +2,7 @@ import random
 import sys
 import time
 import os
+import hashlib
 
 def great_comm_div(a, b) :
     while b != 0 :
@@ -50,6 +51,9 @@ def encrypt(public_key, plain_text) :
 def decrypt(private_key, cipher_text) :
     d, n = private_key
     return ''.join([chr(pow(char, d, n)) for char in cipher_text])
+
+def hash_message(message) :
+    return hashlib.sha256(message.encode()).hexdigest()
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -107,7 +111,9 @@ def main() :
                 public_key, private_key = generate_keys()
                 print(f"\nPublic Key: {public_key}")
                 print(f"\nPrivate Key: {private_key}")
-                encrypted_message = encrypt(public_key, message)
+                message_hash = hash_message(message)
+                combined_message = f"{message}||{message_hash}"
+                encrypted_message = encrypt(public_key, combined_message)
                 print("\nEncrypted message : ", encrypted_message)
                 print("\nSending message to Bob...")
                 envelope_animation()
@@ -119,8 +125,14 @@ def main() :
                         password_receiver = input("\nPlease enter your password : ").strip()
                         if password_receiver == password_bob : 
                             print("\nLogin successful !")
-                            decrypted_message = decrypt(private_key, encrypted_message)
-                            print("\nDecrypted message : ", decrypted_message)
+                            decrypted_combined = decrypt(private_key, encrypted_message)
+                            message_received, received_hash = decrypted_combined.rsplit("||", 1)
+                            recalculated_hash = hash_message(message_received)
+                            if recalculated_hash == received_hash :
+                                print("\nDecrypted message (Integrity Verified):", message_received)
+                            else : 
+                                print("\nWarning: Message integrity could not be verified! The message may have been tampered with.")
+                                print("Received message:", message_received)
                         else :
                             print("Incorrect password.")
                     else :
