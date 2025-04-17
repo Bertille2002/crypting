@@ -1,5 +1,7 @@
 import random
 import sys
+import time
+import os
 
 def great_comm_div(a, b) :
     while b != 0 :
@@ -49,8 +51,46 @@ def decrypt(private_key, cipher_text) :
     d, n = private_key
     return ''.join([chr(pow(char, d, n)) for char in cipher_text])
 
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def envelope_animation():
+    frames = [
+        "Alice     ✉                                                  Bob",
+        "Alice          ✉                                             Bob",
+        "Alice               ✉                                        Bob",
+        "Alice                    ✉                                   Bob",
+        "Alice                         ✉                              Bob",
+        "Alice                              ✉                         Bob",
+        "Alice                                   ✉                    Bob",
+        "Alice                                        ✉               Bob",
+        "Alice                                             ✉          Bob",
+        "Alice                                                  ✉     Bob",
+        "Alice                                                       ✉Bob",
+        "Alice                                                        📬Bob",
+    ]
+    for frame in frames : 
+        clear()
+        print("\n" * 5)
+        print(frame)
+        time.sleep(0.2)
+
+
 def main() :
     print("\nSimple RSA encryption")
+    print("""\n
+        
+        +--------+         +----------------+         +----------------+         +--------+
+        | Alice  | ----->  | Texte en clair | ----->  | Texte chiffré  | ----->  |  Bob   |
+        +--------+         +----------------+         +----------------+         +--------+
+                                 |                          ^
+                                 v                          |
+                       +------------------+         +------------------+
+                       | Clé publique de  |         |  Clé privée de   |
+                       |      Bob         | ======> |       Bob        |
+                       +------------------+         +------------------+
+
+    """)
     username_alice = 'alice'
     password_alice = 'alice'
     username_bob = 'bob'
@@ -69,6 +109,8 @@ def main() :
                 print(f"\nPrivate Key: {private_key}")
                 encrypted_message = encrypt(public_key, message)
                 print("\nEncrypted message : ", encrypted_message)
+                print("\nSending message to Bob...")
+                envelope_animation()
                 choice = input("\nWould you like to decrypt the message (y/n) ? ")
                 if choice == 'y' : 
                     print("\nTo receive the message, you must be logged in as Bob.")
