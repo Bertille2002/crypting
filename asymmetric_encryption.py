@@ -44,16 +44,19 @@ def generate_keys() :
     d = modinv(e, phi)
     return ((e, n), (d, n)) #public key, private key
 
-def encrypt(public_key, plain_text) :
+def encrypt(public_key, message) :
     e, n = public_key
-    return [pow(ord(char), e, n) for char in plain_text]
+    encrypted = [str(pow(ord(char), e, n)) for char in message]
+    return ' '.join(encrypted)
 
 def decrypt(private_key, cipher_text) :
     d, n = private_key
-    return ''.join([chr(pow(char, d, n)) for char in cipher_text])
+    cipher_nums = list(map(int, cipher_text.split()))
+    decrypted_chars = [chr(pow(num, d, n)) for num in cipher_nums]
+    return ''.join(decrypted_chars)
 
-def hash_message(message) :
-    return hashlib.sha256(message.encode()).hexdigest()
+def hash_message(encrypted_message) :
+    return hashlib.sha256(encrypted_message.encode()).hexdigest()
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -110,10 +113,10 @@ def main() :
                 message = sys.stdin.read()
                 public_key, private_key = generate_keys()
                 print(f"\nPublic Key: {public_key}")
-                message_hash = hash_message(message)
-                combined_message = f"{message}||{message_hash}"
-                encrypted_message = encrypt(public_key, combined_message)
-                print("\nEncrypted message : ", encrypted_message)
+                encrypted_message = encrypt(public_key, message)
+                message_hash = hash_message(encrypted_message)
+                combined_message = f"{encrypted_message}||{message_hash}"
+                print("\nEncrypted message : ", combined_message)
                 print("\nPreparing to send message to Bob...")
                 time.sleep(5)
                 envelope_animation()
@@ -126,10 +129,10 @@ def main() :
                         if password_receiver == password_bob : 
                             print("\nLogin successful !")
                             print(f"\nPrivate Key: {private_key}")
-                            decrypted_combined = decrypt(private_key, encrypted_message)
-                            message_received, received_hash = decrypted_combined.rsplit("||", 1)
-                            recalculated_hash = hash_message(message_received)
+                            encrypted_message_str, received_hash = combined_message.rsplit("||", 1)
+                            recalculated_hash = hash_message(encrypted_message_str)
                             if recalculated_hash == received_hash :
+                                message_received = decrypt(private_key, encrypted_message_str)
                                 print("\nDecrypted message (Integrity Verified):", message_received)
                             else : 
                                 print("\nWarning: Message integrity could not be verified! The message may have been tampered with.")
