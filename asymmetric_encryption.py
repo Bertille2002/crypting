@@ -1,61 +1,54 @@
-import random
+import os
 import sys
 import time
-import os
 import hashlib
+import random
+import math
 
-def great_comm_div(a, b) :
-    while b != 0 :
-        a, b = b, a % b
-    return a
+def modinv(a, m):
+    g, x, y = extended_gcd(a, m)
+    if g != 1:
+        raise Exception('No modular inverse')
+    else:
+        return x % m
 
-def modinv(a, m) :
-    m0, x0, x1 = m, 0, 1
-    while a > 1 :
-        q = a // m 
-        a, m = m, a % m 
-        x0, x1 = x1 - q * x0, x0 
-    return x1 + m0 if x1 < 0 else x1
+def extended_gcd(a, b):
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        g, y, x = extended_gcd(b % a, a)
+        return (g, x - (b // a) * y, y)
 
-def is_prime(n) :
-    if n < 2 :
-        return False
-    for i in range(2, int(n**0.5) + 1) :
-        if n % i == 0 :
-            return False
-    return True
+def generate_keys():
+    N = 65537  
+    while True:
+        M = random.randint(2, N-1)
+        if math.gcd(M, N) == 1:
+            break
+    O = random.randint(1000, 5000)
+    M_inv = modinv(M, N)
+    public_key = (M, O, N)
+    private_key = (M_inv, O, N)
+    return public_key, private_key
 
-def gen_prime(start = 100, end = 300) : 
-    while True :
-        p = random.randint(start, end)
-        if is_prime(p) :
-            return p 
+def encrypt(public_key, plaintext):
+    M, O, N = public_key
+    ciphertext = []
+    for ch in plaintext:
+        c = (M * (ord(ch) + O)) % N
+        ciphertext.append(str(c)) 
+    return ' '.join(ciphertext)
 
-def generate_keys() :
-    p = gen_prime()
-    q = gen_prime()
-    while q == p :
-        q = gen_prime()
-    n = p * q
-    phi = (p - 1) * (q - 1)
-    e = random.randrange(2, phi)
-    while great_comm_div(e, phi) != 1 :
-        e = random.randrange(2, phi)
-    d = modinv(e, phi)
-    return ((e, n), (d, n)) #public key, private key
+def decrypt(private_key, ciphertext_str):
+    M_inv, O, N = private_key
+    ciphertext = list(map(int, ciphertext_str.split()))
+    plaintext = ''
+    for c in ciphertext:
+        p = (M_inv * c) % N
+        plaintext += chr(p - O)
+    return plaintext
 
-def encrypt(public_key, message) :
-    e, n = public_key
-    encrypted = [str(pow(ord(char), e, n)) for char in message]
-    return ' '.join(encrypted)
-
-def decrypt(private_key, cipher_text) :
-    d, n = private_key
-    cipher_nums = list(map(int, cipher_text.split()))
-    decrypted_chars = [chr(pow(num, d, n)) for num in cipher_nums]
-    return ''.join(decrypted_chars)
-
-def hash_message(encrypted_message) :
+def hash_message(encrypted_message):
     return hashlib.sha256(encrypted_message.encode()).hexdigest()
 
 def clear():
@@ -76,17 +69,15 @@ def envelope_animation():
         "Alice                                                       ✉Bob",
         "Alice                                                        📬Bob",
     ]
-    for frame in frames : 
+    for frame in frames:
         clear()
         print("\n" * 5)
         print(frame)
         time.sleep(0.2)
 
-
-def main() :
-    print("\nSimple asymetric encryption")
+def main():
+    print("\nSimple asymmetric encryption")
     print("""\n
-        
         +--------+         +----------------+         +----------------+         +--------+
         | Alice  | ----->  | Texte en clair | ----->  | Texte chiffré  | ----->  |  Bob   |
         +--------+         +----------------+         +----------------+         +--------+
@@ -96,38 +87,46 @@ def main() :
                        | Clé publique de  |         |  Clé privée de   |
                        |      Bob         | ======> |       Bob        |
                        +------------------+         +------------------+
-
     """)
-    while True : 
-        print("\nPlease write the message you wish to encrypt : ")
-        message = sys.stdin.read()
+
+    while True:
+        print("\nPlease write the message you wish to encrypt (end with Ctrl+D or Ctrl+Z + Enter):\n")
+        try:
+            message = sys.stdin.read().strip()
+        except KeyboardInterrupt:
+            print("\nInput interrupted. Exiting.")
+            break
+
         public_key, private_key = generate_keys()
         print(f"\nPublic Key: {public_key}")
+
         encrypted_message = encrypt(public_key, message)
         message_hash = hash_message(encrypted_message)
         combined_message = f"{encrypted_message}||{message_hash}"
-        print("\nEncrypted message : ", combined_message)
+       
+        print("\nEncrypted message:\n", combined_message)
         print("\nPreparing to send message to Bob...")
-        time.sleep(5)
+        time.sleep(2)
         envelope_animation()
-        choice = input("\nWould you like to decrypt the message (y/n) ? ")
-        if choice == 'y' : 
+
+        choice = input("\nWould you like to decrypt the message (y/n)? ")
+        if choice.lower() == 'y':
             print(f"\nPrivate Key: {private_key}")
             print(f"\nPublic Key: {public_key}")
             encrypted_message_str, received_hash = combined_message.rsplit("||", 1)
             recalculated_hash = hash_message(encrypted_message_str)
-            if recalculated_hash == received_hash :
+            if recalculated_hash == received_hash:
                 message_received = decrypt(private_key, encrypted_message_str)
                 print("\nDecrypted message (Integrity Verified):", message_received)
-            else : 
+            else:
                 print("\nWarning: Message integrity could not be verified! The message may have been tampered with.")
-                print("Received message:", message_received)
-        else : 
-            print("\nOkay !") 
-        choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
-        if choice2 == 'n' : 
-            print("Thank you.")
-            break 
+        else:
+            print("\nOkay!")
 
-if __name__ == "__main__" :
+        choice2 = input("\nEncryption complete. Do you wish to encrypt another message (y/n)? ")
+        if choice2.lower() == 'n':
+            print("\nThank you.")
+            break
+
+if __name__ == "__main__":
     main()
