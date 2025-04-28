@@ -84,7 +84,7 @@ def envelope_animation():
 
 
 def main() :
-    print("\nSimple RSA encryption")
+    print("\nSimple asymetric encryption")
     print("""\n
         
         +--------+         +----------------+         +----------------+         +--------+
@@ -98,59 +98,36 @@ def main() :
                        +------------------+         +------------------+
 
     """)
-    username_alice = 'alice'
-    password_alice = 'alice'
-    username_bob = 'bob'
-    password_bob = 'bob'
     while True : 
-        print("\nWelcome Alice, to verify it's you, please sign in.")
-        username_sender = input("Please enter your username : ").strip()
-        if username_sender == username_alice : 
-            password_sender = input("Please enter your password : ").strip()
-            if password_sender == password_alice :
-                print("\nLogin successful !")
-                print("\nPlease write the message you wish to encrypt : ")
-                message = sys.stdin.read()
-                public_key, private_key = generate_keys()
-                print(f"\nPublic Key: {public_key}")
-                encrypted_message = encrypt(public_key, message)
-                message_hash = hash_message(encrypted_message)
-                combined_message = f"{encrypted_message}||{message_hash}"
-                print("\nEncrypted message : ", combined_message)
-                print("\nPreparing to send message to Bob...")
-                time.sleep(5)
-                envelope_animation()
-                choice = input("\nWould you like to decrypt the message (y/n) ? ")
-                if choice == 'y' : 
-                    print("\nTo receive the message, you must be logged in as Bob.")
-                    username_receiver = input("\nPlease enter your username : ").strip()
-                    if username_receiver == username_bob :
-                        password_receiver = input("\nPlease enter your password : ").strip()
-                        if password_receiver == password_bob : 
-                            print("\nLogin successful !")
-                            print(f"\nPrivate Key: {private_key}")
-                            encrypted_message_str, received_hash = combined_message.rsplit("||", 1)
-                            recalculated_hash = hash_message(encrypted_message_str)
-                            if recalculated_hash == received_hash :
-                                message_received = decrypt(private_key, encrypted_message_str)
-                                print("\nDecrypted message (Integrity Verified):", message_received)
-                            else : 
-                                print("\nWarning: Message integrity could not be verified! The message may have been tampered with.")
-                                print("Received message:", message_received)
-                        else :
-                            print("Incorrect password.")
-                    else :
-                        print("Incorrect username")
-                else : 
-                    print("\nOkay !") 
-                choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
-                if choice2 == 'n' : 
-                    print("Thank you.")
-                    break 
-            else :
-                print("Incorrect password.")
-        else :
-            print("Incorrect username.")
+        print("\nPlease write the message you wish to encrypt : ")
+        message = sys.stdin.read()
+        public_key, private_key = generate_keys()
+        print(f"\nPublic Key: {public_key}")
+        encrypted_message = encrypt(public_key, message)
+        message_hash = hash_message(encrypted_message)
+        combined_message = f"{encrypted_message}||{message_hash}"
+        print("\nEncrypted message : ", combined_message)
+        print("\nPreparing to send message to Bob...")
+        time.sleep(5)
+        envelope_animation()
+        choice = input("\nWould you like to decrypt the message (y/n) ? ")
+        if choice == 'y' : 
+            print(f"\nPrivate Key: {private_key}")
+            print(f"\nPublic Key: {public_key}")
+            encrypted_message_str, received_hash = combined_message.rsplit("||", 1)
+            recalculated_hash = hash_message(encrypted_message_str)
+            if recalculated_hash == received_hash :
+                message_received = decrypt(private_key, encrypted_message_str)
+                print("\nDecrypted message (Integrity Verified):", message_received)
+            else : 
+                print("\nWarning: Message integrity could not be verified! The message may have been tampered with.")
+                print("Received message:", message_received)
+        else : 
+            print("\nOkay !") 
+        choice2 = input("Encryption complete. Do you wish to encrypt another message (y/n) ? ")
+        if choice2 == 'n' : 
+            print("Thank you.")
+            break 
 
 if __name__ == "__main__" :
     main()
